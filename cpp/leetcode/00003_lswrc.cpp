@@ -55,7 +55,7 @@ public:
                 it = charset.find(s[i]); //继续查找 s[i]， 直到找不到则跳出while
             }
 
-            max_size = std::max(max_size, i-left+1);
+            max_size = std::max(max_size, i-left+1); // left 多了一次++， 因此 为i-(left-1);或者说i从0开始 但是0就是算1个 因此 i+1-left
             charset.insert(s[i]);
         }
         return max_size;
@@ -92,6 +92,32 @@ public:
            //如果right + 1< size 依然成立，才有可能再进入while中
         }
         return max_size;
+    }
+};
+
+//使用hash map
+class Solution4 {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int size = s.size();
+        int left = 0;
+        int max_v = 0;
+        unordered_map<char, int> myhash;
+        for (int i = 0; i < size;i++) {
+            auto it = myhash.find(s[i]);
+
+            while(it != myhash.end()) {
+                myhash.erase(s[left]);
+                left++;
+                it = myhash.find(s[i]);
+            }
+
+            max_v = max(max_v, i+1-left);
+
+            myhash.insert({s[i], i});
+        }
+
+        return max_v;
     }
 };
 

@@ -109,3 +109,28 @@ public:
         return false;
     }
 };
+
+
+class Solution {
+public:
+    bool isValid(string s) {
+        int size = s.size();
+        map<char, char> mp = {make_pair(')','('), make_pair('}','{'), make_pair(']','[')};
+        stack<char> st;
+
+        for (int i = 0; i < size; i++) {
+
+            auto it = mp.find(s[i]);
+            if (it != mp.end()) {
+                if (st.empty() == true || st.top() != it->second) {
+                    return false;
+                }
+                st.pop();
+                continue;
+            }
+            st.push(s[i]);
+        }
+
+        return st.empty();
+    }
+};

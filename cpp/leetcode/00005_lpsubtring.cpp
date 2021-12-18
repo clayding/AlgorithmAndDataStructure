@@ -84,7 +84,7 @@ public:
         int maxLen = 1;
         int begin = 0;
         // dp[i][j] 表示 s[i..j] 是否是回文串
-        std::vector<std::vector<int>> dp(n, std::vector<int>(n));
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n)); //dp 就是dynamic planning
         // 初始化：所有长度为 1 的子串都是回文串
         for (int i = 0; i < n; i++) {
             dp[i][i] = true;
@@ -101,21 +101,21 @@ public:
                     break;
                 }
 
-                if (s[i] != s[j]) {
+                if (s[i] != s[j]) { // 根据状态转移方程: P(i,j)=P(i+1,j−1)∧(Si​ ==Sj​ ), 只要 (Si​ !=Sj​ ) 则P(i,j) 不相等
                     dp[i][j] = false;
-                } else {
-                    if (j - i < 3) {
+                } else { //如果 s[i] == s[j]
+                    if (j - i < 3) { // j -i < 3 也就是 j -i + 1 < 3 + 1,字串最大长度为3 ( < 4)，除去Si 和Sj 最多还有1个. 比如bab 因此肯定是回文子串
                         dp[i][j] = true;
                     } else {
-                        dp[i][j] = dp[i + 1][j - 1];
+                        dp[i][j] = dp[i + 1][j - 1];// 根据状态转移方程 P(i,j)=P(i+1,j−1)∧(Si​ ==Sj​ )
                         std::cout << "(" << i << " " << j << ") = [" << i+1 << " " << j-1 << "]" << std::endl;
                     }
                 }
                 std::cout << "(" << i << " " << j << ") = " <<  dp[i][j] << std::endl;
 
-                // 只要 dp[i][L] == true 成立，就表示子串 s[i..L] 是回文，此时记录回文长度和起始位置
-                if (dp[i][j] && j - i + 1 > maxLen) {
-                    maxLen = j - i + 1;
+                // 只要 dp[i][j] == true 成立，就表示子串 s[i..j] 是回文，此时记录回文长度和起始位置
+                if (dp[i][j] && j - i + 1 > maxLen) { //这里也可以写成 if (dp[i][j] && L > maxLen) {
+                    maxLen = j - i + 1;               // 同样，这里也可以写成 maxLen = L;
                     begin = i;
                 }
             }
@@ -125,25 +125,66 @@ public:
 };
 
 
-class Solution4 {
+//中心扩散
+class Solution {
 public:
-    std::string longestPalindrome(std::string s) {
-        int count = 0;
-        for (int i = 0; i < s.length(); i++) {
-            count += count(s, i, i);//回文子串长度为奇数的情况
-            count += count(s, i, i + 1);//回文子串长度为偶数的情况
+    pair<int, int> expandAroundCenter(const string& s, int left, int right) {
+        while (left >= 0 && right < s.size() && s[left] == s[right]) {
+            --left;
+            ++right;
         }
-        return count;
+        return {left + 1, right - 1};
     }
-    
-    int count(std::string s, int start, int end) {
-        int count = 0;
-        //start往左边跑，end往右边跑，注意边界
-        while (start >= 0 && end < s.length() && s.charAt(start--) == s.charAt(end++)) {
-            count++;
+
+    string longestPalindrome(string s) {
+        int start = 0, end = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            auto [left1, right1] = expandAroundCenter(s, i, i);
+            auto [left2, right2] = expandAroundCenter(s, i, i + 1);
+            if (right1 - left1 > end - start) {
+                start = left1;
+                end = right1;
+            }
+            if (right2 - left2 > end - start) {
+                start = left2;
+                end = right2;
+            }
         }
-        return count;
+        return s.substr(start, end - start + 1);
     }
+};
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int size = s.size();
+        int start = 0, end = 0;
+        for(int i = 0; i < size ; i++) {
+            auto [left1, right1] = count(s, i, i);
+            auto [left2, right2] = count(s, i, i + 1);
+
+            if (right1 - left1 > end - start) {
+                start = left1;
+                end = right1;
+            }
+            if (right2 - left2 > end - start) {
+                start = left2;
+                end = right2;
+            }
+        }
+
+        return s.substr(start, end - start + 1);
+    }
+
+    pair<int, int> count(const string& s, int left, int right) {
+        while(left >= 0 && right < s.size() && s[left] == s[right] ) {
+            --left;
+            ++right;
+        }
+
+        return {left+1, right-1};
+    }
+};
 
 int main(void)
 {

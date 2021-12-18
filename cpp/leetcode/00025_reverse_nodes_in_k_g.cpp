@@ -79,3 +79,47 @@ public:
     }
 };
 
+//第3次做的答案
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        if (head == nullptr) {
+            return head;
+        }
+
+        ListNode *tmp = head;
+        int count = 0;
+        while (tmp) {
+            tmp = tmp->next;
+            count++;
+        }
+
+        if (count < k) {
+            return head;
+        }
+
+        ListNode* prev = head;
+        ListNode* curr = head->next;
+        count = k-1;
+        while(curr != nullptr && count-- > 0 ) {
+            ListNode *tmp = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = tmp;
+        }
+
+        head->next = reverseKGroup(curr, k);
+        return prev;
+    }
+};
+
