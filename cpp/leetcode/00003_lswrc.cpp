@@ -121,6 +121,34 @@ public:
     }
 };
 
+//自己写的更加容易理解的方法
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int n = s.size();
+        int left = 0, right = 0;
+        unordered_set<char> myset;
+        int longest = 0;
+
+        while(left < n && right < n) {
+            if(myset.find(s[right]) != myset.end()) {
+                left++;
+                right = left;
+                myset.clear();
+            } else {
+                myset.insert(s[right]);
+
+                if(right - left + 1 > longest) {
+                    longest = right -  left + 1;
+                }
+                right++;
+            }
+        }
+
+        return longest;
+    }
+};
+
 int main(void)
 {
     // std::string s1 {"abcabcbb"};

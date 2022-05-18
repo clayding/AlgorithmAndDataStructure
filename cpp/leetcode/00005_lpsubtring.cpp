@@ -71,8 +71,54 @@ public:
     }
 };
 
+// 对于长串超出时间限制的方法，因此需要动态规划
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        int begin = 0, end = 0;
+        int min_length = 0;
 
-//动态规划
+        for(int L=1;L <= n;L++) {
+            for(int left = 0;left <= n-1;left++) {
+                int right = left+L-1;
+                if(right >= n) {
+                    continue;
+                }
+
+                string ss = s.substr(left, L);
+                if (isPal(ss)) {
+                    if(L > min_length) {
+                        min_length = L;
+                        begin = left;
+                        end = right;
+                    }
+                }
+            }
+        }
+
+        return s.substr(begin, end-begin+1);
+    }
+
+    bool isPal(string& s) {
+        int size = s.size();
+        int left = 0;
+        int right = size -1;
+
+        while(left <= right) {
+            if(s[left] != s[right]) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+
+        return true;
+    }
+};
+
+
+//动态规划 1, 这个和动态规划2的方法有异曲同工
 class Solution3 {
 public:
     std::string longestPalindrome(std::string s) {
@@ -180,6 +226,124 @@ public:
         while(left >= 0 && right < s.size() && s[left] == s[right] ) {
             --left;
             ++right;
+        }
+
+        return {left+1, right-1};
+    }
+};
+
+//once again 中心扩散
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        int max_left = 0, max_right = 0;
+        for(int i = 0; i < n ;i++) {
+            auto [left1, right1] = expandAroundCenter(s, i, i);
+            auto [left2, right2] = expandAroundCenter(s, i, i+1);
+
+            int max1 = right1 - left1;
+            int max2 = right2 - left2;
+            int max = max_right - max_left;
+            if (max1 > max) {
+                max_right = right1;
+                max_left  = left1;
+            }
+
+            if (max2 > max) {
+                max_right = right2;
+                max_left  = left2;
+            }
+        }
+
+        return s.substr(max_left, max_right - max_left + 1);
+    }
+
+    pair<int, int> expandAroundCenter(string &s, int left, int right) {
+        int n = s.size();
+        while(left >= 0 && right < n && s[left] == s[right]) {
+            left--;
+            right++;
+        }
+
+        return {left + 1, right - 1}; //容易犯错
+    }
+};
+
+// 动态规划 2; 这个和动态规划1的方法有异曲同工
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int start = 0, maxLen = 0;
+        int n = s.size();
+
+        if (n <= 1) {
+            return s;
+        }
+        vector<vector<bool>> dp(n, vector<bool>(n));
+
+        for(int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+
+        //这个在做的时候注意i和j的顺序，一开始写的是for(int i = 0; i < n;i--)
+        //但是这样有个问题 比如i = 0; j = 3; dp[0][3] = dp[1][2]
+        //也就是 dp的i低数字 取决于i的高数字， 因此必须先把i高数字的计算出来，也就是
+        //计算dp[0][x] 需要计算出来 dp[1][x-1]
+        for(int i = n -1; i >= 0;i--) {
+            for(int j = n - 1; j >= i ;j--) {
+                if (s[i] != s[j]) {
+                    dp[i][j] = false;
+                } else {
+                    if (j -i < 3) {
+                        dp[i][j] = true;
+                    } else {
+                        dp[i][j] = dp[i+1][j-1];
+                    }
+                }
+                //cout << " i=" << i << " j=" << j << " dp:" << dp[i][j] << endl;
+                if (dp[i][j] && j - i + 1 > maxLen) {
+                    //cout << "i=" << i << " j=" << j << " maxLen=" << maxLen << endl;
+                    maxLen = j - i +1;
+                    start = i;
+                }
+            }
+        }
+        return s.substr(start, maxLen);
+    }
+};
+
+
+//再次中心扩散
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        int start = 0, stop = 0;
+        for(int i = 0; i < n; i++) {
+            auto [begin1, end1] = expandAroundCenter(s, i, i);
+            auto [begin2, end2] = expandAroundCenter(s, i, i+1);
+            if(end1 - begin1 > stop - start) {
+                stop = end1;
+                start = begin1;
+            }
+            if(end2 - begin2 > stop - start) {
+                stop = end2;
+                start = begin2;
+            }
+        }
+
+        return s.substr(start, stop -start + 1);
+    }
+
+    pair<int, int> expandAroundCenter(string s, int left, int right) {
+        int n = s.size();
+        while(left >=0 &&  right < n && left <= right) {
+            if (s[left] != s[right]) {
+                break;
+            }
+            left--;
+            right++;
         }
 
         return {left+1, right-1};

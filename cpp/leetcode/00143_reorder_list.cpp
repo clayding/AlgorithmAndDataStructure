@@ -134,3 +134,74 @@ public:
         }
     }
 };
+
+//第二遍
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    void reorderList(ListNode* head) {
+        ListNode* mid = midNode(head);
+        ListNode* rhead = reverseList(mid);
+        mergeList(head, rhead);
+    }
+
+    void mergeList(ListNode* list1, ListNode* list2) {
+        ListNode *l1 = list1;
+        ListNode *l2 = list2;
+
+        while (l1 && l2) {
+            /********容易出错的区域 ***********/
+            ListNode *t1 = l1->next;
+            ListNode *t2 = l2->next;
+            l1->next = l2;
+            l2->next = t1;
+            l1 = t1;
+            l2 = t2;
+        }
+    }
+
+    ListNode* midNode(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return nullptr;
+        }
+
+        ListNode *fst = head;
+        ListNode *slw = head;
+
+        while(fst->next && fst->next->next) {
+            fst = fst->next->next;
+            slw = slw->next;
+        }
+
+        return slw;
+    }
+
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return nullptr;
+        }
+
+        ListNode *prev = head;
+        ListNode *curr = head->next;
+
+        while(curr) {
+            ListNode *temp = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = temp;
+        }
+
+        head->next = nullptr;
+
+        return prev;
+    }
+};
